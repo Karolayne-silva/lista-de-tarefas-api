@@ -47,7 +47,18 @@ export default class TaskController {
     }
   }
 
-  static async getAll(req: Request, res: Response) {}
+  static async getAll(req: Request, res: Response) {
+    try{
+      const tasks = await Task.find();
+      return res
+        .status(200)
+        .json({ message: "Tarefas recuperadas com sucesso!", task: tasks });
+
+    }catch(error){
+      console.log(`error: ${error}`);
+      return res.status(500).json({ message: "Erro ao recuperar tarefas!" });
+    }
+  }
 
   static async getFindById(req: Request, res: Response) {}
 
