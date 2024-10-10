@@ -7,10 +7,10 @@ export default class TagsController {
    try{
       const newTag = new Tag({ name, color });
 
-    await newTag.save();
-    return res
-      .status(201)
-      .json({ message: "Tag criada com sucesso!", tag: newTag });
+      await newTag.save();
+      return res
+         .status(201)
+         .json({ message: "Tag criada com sucesso!", tag: newTag });
    }catch(error){
       console.log(`error: ${error}`);
       return res.status(500).json({message: "Error ao criar tag"});

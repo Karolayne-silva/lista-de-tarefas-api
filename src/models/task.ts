@@ -20,7 +20,7 @@ export const taskSchema = new Schema<ITask>(
     description: { type: String },
     priority: { type: Number, required: true, min: 1, max: 10 },
     tags: [{ type: mongoose.Schema.Types.ObjectId, ref: "Tag" }],
-    createdBy: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   },
   {
     timestamps: true,
