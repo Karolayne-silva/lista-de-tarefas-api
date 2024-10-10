@@ -1,7 +1,7 @@
 import mongoose, {model, Schema} from "mongoose";
 
 interface IUser{
-   senha: string;
+   password: string;
    email: string;
    tasks: mongoose.Types.ObjectId[];
 }
@@ -11,7 +11,7 @@ const UserSchema = new Schema<IUser>({
       type: String, 
       required: true,
    },
-   senha: {
+   password: {
       type: String,
       required: true,
       min: 8
