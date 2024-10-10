@@ -20,3 +20,4 @@ export const taskSchema = new Schema<ITask>({
 })
 
 const Task = model<ITask>('Task', taskSchema);
+export default Task;
