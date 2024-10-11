@@ -1,13 +1,14 @@
 import { Router } from "express";
 import TaskController from "../controllers/TaskController";
+import authMiddleware from "../middlewares/authMiddleware";
 
 const router = Router();
 
-router.post("/create", TaskController.create);
-router.get("/", TaskController.getAll);
-router.get("/:id", TaskController.getFindById);
-router.post("/bytags", TaskController.tasksByTag);
-router.patch("/:id", TaskController.update);
-router.delete("/:id", TaskController.delete);
+router.post("/create", authMiddleware, TaskController.create);
+router.get("/", authMiddleware, TaskController.getAll);
+router.get("/:id", authMiddleware, TaskController.getFindById);
+router.post("/bytags", authMiddleware, TaskController.tasksByTag);
+router.patch("/:id", authMiddleware,  TaskController.update);
+router.delete("/:id", authMiddleware,  TaskController.delete);
 
 export default router;

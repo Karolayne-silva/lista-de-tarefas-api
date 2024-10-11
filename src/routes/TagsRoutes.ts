@@ -1,11 +1,12 @@
 import { Router } from "express";
 import TagsController from "../controllers/TagsController";
+import authMiddleware from "../middlewares/authMiddleware";
 const router = Router();
 
-router.post("/create", TagsController.create);
-router.get("/", TagsController.getAll);
-router.get("/:id", TagsController.getFindById);
-router.patch("/:id", TagsController.update);
-router.delete("/:id", TagsController.delete);
+router.post("/create", authMiddleware, TagsController.create);
+router.get("/", authMiddleware, TagsController.getAll);
+router.get("/:id", authMiddleware, TagsController.getFindById);
+router.patch("/:id", authMiddleware, TagsController.update);
+router.delete("/:id",authMiddleware,  TagsController.delete);
 
 export default router;

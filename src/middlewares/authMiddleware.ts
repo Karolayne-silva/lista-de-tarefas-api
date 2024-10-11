@@ -2,13 +2,13 @@ import { Response, Request, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import User from "../models/users";
-dotenv.config()
+dotenv.config();
 
-interface IPayload{
-   sub: string;
+interface IPayload {
+  sub: string;
 }
 
-export const authMiddleware = async (
+const authMiddleware = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -22,17 +22,23 @@ export const authMiddleware = async (
   const token = authorization.split("")[1];
 
   try {
-   const {sub: id} = jwt.verify(token, process.env.JWT_SECRET || '') as IPayload;
+    const { sub: id } = jwt.verify(
+      token,
+      process.env.JWT_SECRET || ""
+    ) as IPayload;
 
-   const user = await User.findById(id);
+    const user = await User.findById(id);
 
-   if(!user){
-      res.status(404).json({ message: "Usuário não existe"})
-   }
+    if (!user) {
+      res.status(404).json({ message: "Usuário não existe" });
+    }
 
-   req.userId = id;
-   next()
+    req.userId = id;
+    next();
+    
   } catch (error) {
     res.json({ message: "Token Inválido!" });
   }
 };
+
+export default authMiddleware;
