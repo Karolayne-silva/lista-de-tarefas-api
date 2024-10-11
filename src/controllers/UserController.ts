@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import User from "../models/users";
-import bcrypt, {compare} from "bcrypt";
-import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 export default class UserController {
   static async create(req: Request, res: Response) {
