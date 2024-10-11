@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import User from "../models/users";
-import bcrypt from "bcrypt";
+import bcrypt, {compare} from "bcrypt";
 import jwt from "jsonwebtoken";
 
 export default class UserController {
@@ -15,7 +15,7 @@ export default class UserController {
           .json({ message: "Usuário com esse email já cadastrado" });
       }
 
-      const hashPassword = bcrypt.hash(password, 10);
+      const hashPassword = await bcrypt.hash(password, 10);
 
       const newUser = new User({
         email,
@@ -30,6 +30,8 @@ export default class UserController {
       return res.status(500).json({ message: "Erro ao criar Usuário" });
     }
   }
+
+  
 
   static async getAll(req: Request, res: Response) {
     try {
