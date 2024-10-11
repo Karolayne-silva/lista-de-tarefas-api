@@ -12,19 +12,17 @@ export default class AuthenticateController {
 
     const user = await User.findOne({ email });
 
-
     if (!user) {
       return res.status(400).json({ message: "Email ou senha incorreto" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
 
-
     if (!passwordMatch) {
       return res.status(400).json({ message: "Email ou senha incorreto" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || "", {
       expiresIn: "1d",
     });
 
