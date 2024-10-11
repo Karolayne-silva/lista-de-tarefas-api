@@ -5,10 +5,11 @@ dotenv.config()
 const connectDB = async () =>{
    try{
       await mongoose.connect(process.env.MONGODB_URL || '') 
-      console.log("Banco conectado com sucesso!");
+      console.log("Banco de dados conectado com sucesso!");
    }catch(error){
       console.log(`Error: ${error}`);
    }
 }
 
 export default connectDB;
+

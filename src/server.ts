@@ -7,12 +7,14 @@ import UserRouter from "./routes/UsersRoutes";
 const app = express();
 app.use(express.json());
 
+connectDB();
+
 app.use("/tasks", TaskRouter);
 app.use("/tags", TagsRouter);
 app.use("/users", UserRouter);
 
-connectDB();
+
 
 app.listen(3000, () => {
-  console.log("server rodando");
+  console.log("Server is running!");
 });
