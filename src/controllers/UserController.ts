@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import User from "../models/users";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 export default class UserController {
   static async create(req: Request, res: Response) {
@@ -13,9 +15,11 @@ export default class UserController {
           .json({ message: "Usuário com esse email já cadastrado" });
       }
 
+      const hashPassword = bcrypt.hash(password, 10);
+
       const newUser = new User({
         email,
-        password,
+        password: hashPassword,
       });
 
       await newUser.save();
