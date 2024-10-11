@@ -34,7 +34,6 @@ export default class TagsController {
    const { id } = req.params;
     try {
       const tag = await Tag.findById(id);
-      console.log(tag)
 
       return res
         .status(200)
