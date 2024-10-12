@@ -26,8 +26,10 @@ export default class TagsController {
   }
 
   static async getAll(req: Request, res: Response) {
+    const userId = req.userId;
+    
     try {
-      const tags = await Tag.find();
+      const tags = await Tag.find({createdBy: userId });
       return res
         .status(200)
         .json({ message: "Tags recuperadas com sucesso!", tag: tags });
