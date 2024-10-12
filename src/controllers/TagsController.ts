@@ -27,7 +27,7 @@ export default class TagsController {
 
   static async getAll(req: Request, res: Response) {
     const userId = req.userId;
-    
+
     try {
       const tags = await Tag.find({createdBy: userId });
       return res
@@ -41,8 +41,13 @@ export default class TagsController {
 
   static async getFindById(req: Request, res: Response) {
     const { id } = req.params;
+    const userId = req.userId;
     try {
       const tag = await Tag.findById(id);
+
+      if (!tag || tag.createdBy.toString() !== userId) {
+        return res.status(404).json({ message: "Tag não encontrada" });
+      }
 
       return res
         .status(200)
