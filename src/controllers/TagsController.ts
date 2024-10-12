@@ -10,7 +10,9 @@ export default class TagsController {
       const existingTag = await Tag.findOne({ name: name, createdBy: userId });
 
       if (existingTag) {
-        return res.status(400).json({ message: "Já existe essa tag para esse usuário" });
+        return res
+          .status(400)
+          .json({ message: "Já existe essa tag para esse usuário" });
       }
 
       const newTag = new Tag({ name, color, createdBy: userId });
@@ -29,7 +31,7 @@ export default class TagsController {
     const userId = req.userId;
 
     try {
-      const tags = await Tag.find({createdBy: userId });
+      const tags = await Tag.find({ createdBy: userId });
       return res
         .status(200)
         .json({ message: "Tags recuperadas com sucesso!", tag: tags });
@@ -65,7 +67,16 @@ export default class TagsController {
   static async update(req: Request, res: Response) {
     const { id } = req.params;
     const updateData = req.body;
+    const userId = req.userId;
+
     try {
+
+      const tag = await Tag.findOne({ _id: id, createdBy: userId });
+
+      if (!tag) {
+        return res.status(404).json({ message: "Tag não encontrada" });
+      }
+
       const updatedTag = await Tag.findByIdAndUpdate(id, updateData, {
         new: true,
         runValidators: true,
@@ -74,6 +85,7 @@ export default class TagsController {
       return res
         .status(200)
         .json({ message: "Tag atualizada com sucesso!", tag: updatedTag });
+        
     } catch (error: any) {
       if (error.name === "CastError") {
         return res.status(404).json({ message: "Tag não encontrada" });
