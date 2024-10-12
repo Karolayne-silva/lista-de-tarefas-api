@@ -15,7 +15,6 @@ export default class TaskController {
         const color = tags[i].color;
 
         const existingTag = await Tags.findOne({ name });
-        console.log(existingTag);
 
         if (existingTag) {
           createdTags.push(existingTag._id.toString());
@@ -162,7 +161,7 @@ export default class TaskController {
       return res.status(200).json({ message: "Tarefa deletada com sucesso!" });
     } catch (error) {
       console.log(`error: ${error}`);
-      return res.status(500).json({ message: "Erro ao deletar tag" });
+      return res.status(500).json({ message: "Erro ao deletar tarefa" });
     }
   }
 }
