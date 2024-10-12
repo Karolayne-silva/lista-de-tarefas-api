@@ -34,7 +34,8 @@ export default class UserController {
 
   static async getAll(req: Request, res: Response) {
     try {
-      const Users = await User.find();
+      const Users = await User.find().populate("tasks", "title");
+
       return res
         .status(200)
         .json({ message: "Usuários recuperados com sucesso!", Users: Users });
