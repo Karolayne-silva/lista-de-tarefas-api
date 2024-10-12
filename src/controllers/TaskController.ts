@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import Task from "../models/task";
 import Tags from "../models/tags";
+import User from "../models/users";
 
 export default class TaskController {
   static async create(req: Request, res: Response) {
-    try {
-      const { title, status, description, priority, tags } = req.body;
-      const userId = req.userId;
+    const { title, status, description, priority, tags } = req.body;
+    const userId = req.userId;
 
+    try {
       const createdTags: string[] = [];
 
       for (let i = 0; i < tags.length; i++) {
@@ -35,6 +36,13 @@ export default class TaskController {
       });
 
       await newtask.save();
+
+      await User.findByIdAndUpdate(
+        userId,
+        { $push: { tasks: newtask._id } },
+        { new: true }
+      );
+
       res
         .status(201)
         .json({ message: "Tarefa criada com sucesso!", task: newtask });
@@ -62,7 +70,6 @@ export default class TaskController {
   }
 
   static async getFindById(req: Request, res: Response) {
-
     const { id } = req.params;
     const userId = req.userId;
 
@@ -91,7 +98,7 @@ export default class TaskController {
   static async tasksByTag(req: Request, res: Response) {
     const { tags } = req.body;
     const userId = req.userId;
-    
+
     try {
       const tagNames = tags.map((tag: { name: string }) => tag.name);
       const foundTags = await Tags.find({ name: { $in: tagNames } });
