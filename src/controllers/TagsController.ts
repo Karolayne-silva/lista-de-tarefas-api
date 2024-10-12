@@ -85,7 +85,7 @@ export default class TagsController {
       return res
         .status(200)
         .json({ message: "Tag atualizada com sucesso!", tag: updatedTag });
-        
+
     } catch (error: any) {
       if (error.name === "CastError") {
         return res.status(404).json({ message: "Tag não encontrada" });
@@ -97,8 +97,16 @@ export default class TagsController {
 
   static async delete(req: Request, res: Response) {
     const { id } = req.params;
+    const userId = req.userId;
     try {
+      const tag = await Tag.findOne({ _id: id, createdBy: userId });
+
+      if (!tag) {
+        return res.status(404).json({ message: "Tag não encontrada" });
+      }
+      
       await Tag.findByIdAndDelete(id);
+
 
       return res.status(200).json({ message: "Tag deletada com sucesso!" });
     } catch (error: any) {
