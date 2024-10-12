@@ -1,6 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 
-interface ITask {
+export interface ITask {
   title: string;
   status: "Para fazer" | "Em andamento" | "Finalizado";
   description: string;

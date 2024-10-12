@@ -2,6 +2,7 @@ import User from "../models/users";
 import bcrypt from "bcrypt";
 
 class UserService {
+  
   async createUser(email: string, password: string) {
     const existingEmail = await User.findOne({ email });
 

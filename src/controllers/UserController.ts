@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import User from "../models/users";
 import UserService from "../services/UserService";
 
 export default class UserController {

@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import Task from "../models/task";
-import Tags from "../models/tags";
-import User from "../models/users";
+import TaskService from "../services/TaskService";
 
 export default class TaskController {
   static async create(req: Request, res: Response) {
@@ -9,39 +7,16 @@ export default class TaskController {
     const userId = req.userId;
 
     try {
-      const createdTags: string[] = [];
-
-      for (let i = 0; i < tags.length; i++) {
-        const name = tags[i].name;
-        const color = tags[i].color;
-
-        const existingTag = await Tags.findOne({ name });
-
-        if (existingTag) {
-          createdTags.push(existingTag._id.toString());
-        } else {
-          const newTag = new Tags({ name, color, createdBy: userId });
-          await newTag.save();
-          createdTags.push(newTag._id.toString());
-        }
-      }
-
-      const newtask = new Task({
+      const taskData = {
         title,
         status,
         description,
         priority,
-        tags: createdTags,
+        tags,
         createdBy: userId,
-      });
+      };
 
-      await newtask.save();
-
-      await User.findByIdAndUpdate(
-        userId,
-        { $push: { tasks: newtask._id } },
-        { new: true }
-      );
+      const newtask = await TaskService.createTask(taskData, userId);
 
       res
         .status(201)
@@ -54,12 +29,13 @@ export default class TaskController {
 
   static async getAll(req: Request, res: Response) {
     const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
 
     try {
-      const tasks = await Task.find({ createdBy: userId }).populate({
-        path: "tags",
-        select: "name",
-      });
+      const tasks = await TaskService.getAllTasks(userId);
+
       return res
         .status(200)
         .json({ message: "Tarefas recuperadas com sucesso!", task: tasks });
@@ -73,14 +49,15 @@ export default class TaskController {
     const { id } = req.params;
     const userId = req.userId;
 
+    if (!userId) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
+
     try {
-      const task = await Task.findById(id).populate({
-        path: "tags",
-        select: "name",
-      });
+      const task = await TaskService.getTaskById(id);
 
       if (!task || task.createdBy.toString() !== userId) {
-        return res.status(404).json({ message: "Tarefa não encontrada" });
+        return res.status(404).json({ message: "Tarefa não encontrada!" });
       }
 
       return res
@@ -88,7 +65,7 @@ export default class TaskController {
         .json({ message: "Tarefa recuperada com sucesso!", task: task });
     } catch (error: any) {
       if (error.name === "CastError") {
-        return res.status(404).json({ message: "Tarefa não encontrada" });
+        return res.status(404).json({ message: "ID inválido" });
       }
       console.log(`error: ${error.name}`);
       return res.status(500).json({ message: "Erro ao recuperar tarefa" });
@@ -99,22 +76,12 @@ export default class TaskController {
     const { tags } = req.body;
     const userId = req.userId;
 
+    if (!userId) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
+
     try {
-      const tagNames = tags.map((tag: { name: string }) => tag.name);
-      const foundTags = await Tags.find({ name: { $in: tagNames } });
-      const tagIds = foundTags.map((tag) => tag._id);
-
-      const tasks = await Task.find({
-        createdBy: userId,
-        tags: { $in: tagIds },
-      }).populate({
-        path: "tags",
-        select: "name",
-      });
-
-      if (tasks.length === 0) {
-        return res.status(404).json({ message: "Nenhuma tarefa encontrada" });
-      }
+      const tasks = await TaskService.getTasksByTags(tags, userId);
 
       return res
         .status(200)
@@ -130,21 +97,16 @@ export default class TaskController {
     const updateData = req.body;
     const userId = req.userId;
 
+    if (!userId) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
+
     try {
-      const task = await Task.findOne({ _id: id, createdBy: userId });
-
-      if (!task) {
-        return res.status(404).json({ message: "Tarefa não encontrada" });
-      }
-
-      const updatedTag = await Task.findByIdAndUpdate(id, updateData, {
-        new: true,
-        runValidators: true,
-      });
+      const task = await TaskService.updateTask(id, userId, updateData);
 
       return res
         .status(200)
-        .json({ message: "Tarefa atualizada com sucesso!", tag: updatedTag });
+        .json({ message: "Tarefa atualizada com sucesso!", task });
     } catch (error: any) {
       if (error.name === "CastError") {
         return res.status(404).json({ message: "Tarefa não encontrada" });
@@ -158,15 +120,21 @@ export default class TaskController {
     const { id } = req.params;
     const userId = req.userId;
 
-    try {
-      const task = await Task.findOne({ _id: id, createdBy: userId });
+    if (!userId) {
+      return res.status(401).json({ message: "Usuário não autenticado." });
+    }
 
-      if (!task) {
-        return res.status(404).json({ message: "Tarefa não encontrada" });
-      }
-      await Task.findByIdAndDelete(id);
+    try {
+      const task = await TaskService.deleteTask(id, userId);
+
       return res.status(200).json({ message: "Tarefa deletada com sucesso!" });
-    } catch (error) {
+    } catch (error: any) {
+      if (error instanceof Error) {
+        if (error.message === "Tarefa não encontrada!") {
+          return res.status(404).json({ message: error.message });
+        }
+      }
+
       console.log(`error: ${error}`);
       return res.status(500).json({ message: "Erro ao deletar tarefa" });
     }
