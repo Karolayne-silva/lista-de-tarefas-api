@@ -129,12 +129,10 @@ export default class TaskController {
 
       return res.status(200).json({ message: "Tarefa deletada com sucesso!" });
     } catch (error: any) {
-      if (error instanceof Error) {
-        if (error.message === "Tarefa não encontrada!") {
-          return res.status(404).json({ message: error.message });
-        }
+      
+      if (error.message === "Tarefa não encontrada!") {
+        return res.status(404).json({ message: error.message });
       }
-
       console.log(`error: ${error}`);
       return res.status(500).json({ message: "Erro ao deletar tarefa" });
     }
