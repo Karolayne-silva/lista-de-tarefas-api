@@ -5,8 +5,8 @@ import Tags from "../models/tags";
 export default class TaskController {
   static async create(req: Request, res: Response) {
     try {
-      const { title, status, description, priority, tags, createdBy } =
-        req.body;
+      const { title, status, description, priority, tags } = req.body;
+      const userId = req.userId;
 
       const createdTags: string[] = [];
 
@@ -20,7 +20,7 @@ export default class TaskController {
         if (existingTag) {
           createdTags.push(existingTag._id.toString());
         } else {
-          const newTag = new Tags({ name, color });
+          const newTag = new Tags({ name, color, createdBy: userId });
           await newTag.save();
           createdTags.push(newTag._id.toString());
         }
@@ -32,7 +32,7 @@ export default class TaskController {
         description,
         priority,
         tags: createdTags,
-        createdBy,
+        createdBy: userId,
       });
 
       await newtask.save();
@@ -46,8 +46,10 @@ export default class TaskController {
   }
 
   static async getAll(req: Request, res: Response) {
+    const userId = req.userId;
+
     try {
-      const tasks = await Task.find().populate({
+      const tasks = await Task.find({ createdBy: userId }).populate({
         path: "tags",
         select: "name",
       });
@@ -61,12 +63,19 @@ export default class TaskController {
   }
 
   static async getFindById(req: Request, res: Response) {
+    //testar esse endpoint coma tarefa de outro usuario
     const { id } = req.params;
+    const userId = req.userId;
+
     try {
       const task = await Task.findById(id).populate({
         path: "tags",
         select: "name",
       });
+
+      if (!task || task.createdBy.toString() !== userId) {
+        return res.status(404).json({ message: "Tarefa não encontrada" });
+      }
 
       return res
         .status(200)
@@ -82,18 +91,20 @@ export default class TaskController {
 
   static async tasksByTag(req: Request, res: Response) {
     const { tags } = req.body;
-
+    const userId = req.userId;
     try {
       const tagNames = tags.map((tag: { name: string }) => tag.name);
       const foundTags = await Tags.find({ name: { $in: tagNames } });
       const tagIds = foundTags.map((tag) => tag._id);
 
-      const tasks = await Task.find({ tags: { $in: tagIds } }).populate({
+      const tasks = await Task.find({
+        createdBy: userId,
+        tags: { $in: tagIds },
+      }).populate({
         path: "tags",
         select: "name",
       });
-
-
+      
       if (tasks.length === 0) {
         return res.status(404).json({ message: "Nenhuma tarefa encontrada" });
       }
