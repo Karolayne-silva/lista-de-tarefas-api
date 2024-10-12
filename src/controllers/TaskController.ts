@@ -63,7 +63,7 @@ export default class TaskController {
   }
 
   static async getFindById(req: Request, res: Response) {
-    //testar esse endpoint coma tarefa de outro usuario
+
     const { id } = req.params;
     const userId = req.userId;
 
@@ -92,6 +92,7 @@ export default class TaskController {
   static async tasksByTag(req: Request, res: Response) {
     const { tags } = req.body;
     const userId = req.userId;
+    
     try {
       const tagNames = tags.map((tag: { name: string }) => tag.name);
       const foundTags = await Tags.find({ name: { $in: tagNames } });
@@ -104,7 +105,7 @@ export default class TaskController {
         path: "tags",
         select: "name",
       });
-      
+
       if (tasks.length === 0) {
         return res.status(404).json({ message: "Nenhuma tarefa encontrada" });
       }
@@ -118,7 +119,50 @@ export default class TaskController {
     }
   }
 
-  static async update(req: Request, res: Response) {}
+  static async update(req: Request, res: Response) {
+    const { id } = req.params;
+    const updateData = req.body;
+    const userId = req.userId;
 
-  static async delete(req: Request, res: Response) {}
+    try {
+      const task = await Task.findOne({ _id: id, createdBy: userId });
+
+      if (!task) {
+        return res.status(404).json({ message: "Tarefa não encontrada" });
+      }
+
+      const updatedTag = await Task.findByIdAndUpdate(id, updateData, {
+        new: true,
+        runValidators: true,
+      });
+
+      return res
+        .status(200)
+        .json({ message: "Tarefa atualizada com sucesso!", tag: updatedTag });
+    } catch (error: any) {
+      if (error.name === "CastError") {
+        return res.status(404).json({ message: "Tarefa não encontrada" });
+      }
+      console.log(`error: ${error}`);
+      res.status(500).json({ message: "Erro ao atualizar a tarefa" });
+    }
+  }
+
+  static async delete(req: Request, res: Response) {
+    const { id } = req.params;
+    const userId = req.userId;
+
+    try {
+      const task = await Task.findOne({ _id: id, createdBy: userId });
+
+      if (!task) {
+        return res.status(404).json({ message: "Tarefa não encontrada" });
+      }
+      await Task.findByIdAndDelete(id);
+      return res.status(200).json({ message: "Tarefa deletada com sucesso!" });
+    } catch (error) {
+      console.log(`error: ${error}`);
+      return res.status(500).json({ message: "Erro ao deletar tag" });
+    }
+  }
 }
