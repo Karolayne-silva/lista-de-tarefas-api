@@ -1,40 +1,29 @@
 import { Request, Response } from "express";
 import User from "../models/users";
-import bcrypt from "bcrypt";
+import UserService from "../services/UserService";
 
 export default class UserController {
   static async create(req: Request, res: Response) {
     const { email, password } = req.body;
 
     try {
-      const existingEmail = await User.findOne({ email });
-      if (existingEmail) {
-        return res
-          .status(400)
-          .json({ message: "Usuário com esse email já cadastrado" });
+      const newUser = await UserService.createUser(email, password);
+
+      return res
+        .status(201)
+        .json({ message: "Usuário criado com sucesso!", newUser });
+    } catch (error: any) {
+      if (error.message === "Usuário com esse email já cadastrado.") {
+        return res.status(400).json({ message: error.message });
       }
-
-      const hashPassword = await bcrypt.hash(password, 10);
-
-      const newUser = new User({
-        email,
-        password: hashPassword,
-      });
-
-      await newUser.save();
-
-      return res.status(201).json({ message: "Usuário criado com sucesso!" });
-    } catch (error) {
-      console.log(`error: ${error}`);
+      console.log(`Error: ${error}`);
       return res.status(500).json({ message: "Erro ao criar Usuário" });
     }
   }
 
-  
-
   static async getAll(req: Request, res: Response) {
     try {
-      const Users = await User.find().populate("tasks", "title");
+      const Users = await UserService.getAllUsers();
 
       return res
         .status(200)
@@ -48,7 +37,7 @@ export default class UserController {
   static async getUserById(req: Request, res: Response) {
     const { id } = req.params;
     try {
-      const user = await User.findById(id);
+      const user = await UserService.getUserById(id);
 
       return res
         .status(200)
@@ -67,21 +56,7 @@ export default class UserController {
     const { id } = req.params;
     const updateData = req.body;
     try {
-
-      if (updateData.email) {
-        const existingUser = await User.findOne({ email: updateData.email });
-
-        if (existingUser && existingUser._id.toString() !== id) {
-          return res
-            .status(400)
-            .json({ message: "Email já cadastrado por outro usuário!" });
-        }
-      }
-
-      const updatedUser = await User.findByIdAndUpdate(id, updateData, {
-        new: true,
-        runValidators: true,
-      });
+      const updatedUser = await UserService.updateUser(id, updateData);
 
       return res.status(200).json({
         message: "Usuário atualizado com sucesso!",
@@ -100,7 +75,7 @@ export default class UserController {
     const { id } = req.params;
 
     try {
-      await User.findByIdAndDelete(id);
+      await UserService.deleteUser(id);
 
       return res.status(200).json({ message: "Usuário deletado com sucesso!" });
     } catch (error: any) {
