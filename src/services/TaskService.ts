@@ -19,24 +19,27 @@ export interface ITagCreate {
 
 class TaskService {
   async createTask(taskData: ITaskCreate, userId: string) {
-    const { title, status, description, priority, tags, createdBy } = taskData;
+    const { title, status, description, priority, tags} = taskData;
 
     const createdTags: string[] = [];
-
-    for (let i = 0; i < tags.length; i++) {
-      const name = tags[i].name;
-      const color = tags[i].color;
-
-      const existingTag = await Tags.findOne({ name });
-
-      if (existingTag) {
-        createdTags.push(existingTag._id.toString());
-      } else {
-        const newTag = new Tags({ name, color, createdBy: userId });
-        await newTag.save();
-        createdTags.push(newTag._id.toString());
+    
+    if(tags){
+      for (let i = 0; i < tags.length; i++) {
+        const name = tags[i].name;
+        const color = tags[i].color;
+  
+        const existingTag = await Tags.findOne({ name });
+  
+        if (existingTag) {
+          createdTags.push(existingTag._id.toString());
+        } else {
+          const newTag = new Tags({ name, color, createdBy: userId });
+          await newTag.save();
+          createdTags.push(newTag._id.toString());
+        }
       }
     }
+    
 
     const newtask = new Task({
       title,
