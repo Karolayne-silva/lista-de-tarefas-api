@@ -30,7 +30,7 @@ Esta API permite gerenciar usuários, tarefas e tags, com funcionalidades como c
 
 1. Clone este repositório:
     ```bash
-    git clone 
+    git clone https://github.com/Karolayne-silva/lista-de-tarefas-api.git
     ```
 
 2. Acesse o diretório do projeto:
