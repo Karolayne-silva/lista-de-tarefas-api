@@ -140,7 +140,7 @@ Esta API permite gerenciar usuários, tarefas e tags, com funcionalidades como c
   
   ```json
     {
-      password: "senha2"
+      "password": "senha2"
     }
   ```
   
