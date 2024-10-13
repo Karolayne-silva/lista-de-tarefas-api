@@ -19,17 +19,17 @@ export interface ITagCreate {
 
 class TaskService {
   async createTask(taskData: ITaskCreate, userId: string) {
-    const { title, status, description, priority, tags} = taskData;
+    const { title, status, description, priority, tags } = taskData;
 
     const createdTags: string[] = [];
-    
-    if(tags){
+
+    if (tags) {
       for (let i = 0; i < tags.length; i++) {
         const name = tags[i].name;
         const color = tags[i].color;
-  
+
         const existingTag = await Tags.findOne({ name });
-  
+
         if (existingTag) {
           createdTags.push(existingTag._id.toString());
         } else {
@@ -39,7 +39,6 @@ class TaskService {
         }
       }
     }
-    
 
     const newtask = new Task({
       title,
@@ -75,6 +74,8 @@ class TaskService {
       select: "name",
     });
 
+
+    
     return task;
   }
 
@@ -94,11 +95,7 @@ class TaskService {
       select: "name",
     });
 
-    if (tasks.length === 0) {
-      throw new Error("Nenhuma tarefa encontrada");
-    }
-
-    return tasks;
+    return tasks.length ? tasks : null;
   }
 
   async updateTask(
@@ -129,7 +126,7 @@ class TaskService {
     const task = await Task.findOne({ _id: id, createdBy: userId });
 
     if (!task) {
-      throw new Error("Tarefa não encontrada!")
+      throw new Error("Tarefa não encontrada!");
     }
     await Task.findByIdAndDelete(id);
 

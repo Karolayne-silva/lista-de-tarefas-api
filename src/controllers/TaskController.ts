@@ -83,11 +83,14 @@ export default class TaskController {
     try {
       const tasks = await TaskService.getTasksByTags(tags, userId);
 
+      if (!tasks) {
+        return res.status(404).json({ message: "Nenhuma tarefa encontrada" });
+      }
       return res
         .status(200)
         .json({ message: "tarefas encontradas com sucesso!", tasks: tasks });
-    } catch (error) {
-      console.log(`error: ${error}`);
+    } catch (error: any) {
+      console.log(`Error: ${error}`);
       return res.status(500).json({ message: "Erro ao recuperar tarefas" });
     }
   }
@@ -129,7 +132,6 @@ export default class TaskController {
 
       return res.status(200).json({ message: "Tarefa deletada com sucesso!" });
     } catch (error: any) {
-      
       if (error.message === "Tarefa não encontrada!") {
         return res.status(404).json({ message: error.message });
       }
