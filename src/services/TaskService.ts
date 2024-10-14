@@ -1,6 +1,7 @@
 import Task from "../models/task";
 import Tags from "../models/tags";
 import User from "../models/users";
+import mongoose from "mongoose";
 
 export interface ITaskCreate {
   title: string;
@@ -74,8 +75,6 @@ class TaskService {
       select: "name",
     });
 
-
-    
     return task;
   }
 
@@ -106,6 +105,7 @@ class TaskService {
       status: string;
       description: string;
       priority: number;
+      tags: { name: string; color: string; id: mongoose.Types.ObjectId }[];
     }
   ) {
     const task = await Task.findOne({ _id: id, createdBy: userId });
@@ -114,18 +114,37 @@ class TaskService {
       throw new Error("Tarefa não encontrada");
     }
 
-    const updatedTag = await Task.findByIdAndUpdate(id, updateData, {
+    let tags: mongoose.Types.ObjectId[] = [...task.tags];
+
+    if (updateData.tags) {
+      for (const tag of updateData.tags) {
+        const existingTag = await Tags.findOne({ name: tag.name, createdBy: userId });
+
+        if (!existingTag) {
+          throw new Error("Tag não existe e não pode ser atribuida");
+        }
+        tags.push(existingTag._id);
+      }
+
+      updateData.tags = tags;
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(id, updateData, {
       new: true,
       runValidators: true,
+    }).populate({
+      path: "tags",
+      select: "name",
     });
 
-    return updatedTag;
+    return updatedTask;
   }
 
   async deleteTask(id: string, userId: string) {
     const task = await Task.findOne({ _id: id, createdBy: userId });
 
     if (!task) {
+      console.log("entrou aq");
       throw new Error("Tarefa não encontrada!");
     }
     await Task.findByIdAndDelete(id);

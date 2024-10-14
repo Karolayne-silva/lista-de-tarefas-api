@@ -1,5 +1,5 @@
 import express from "express";
-import connectDB from "./db/database";
+import connectDB from "./database/database";
 import TaskRouter from "./routes/TaskRoutes";
 import TagsRouter from "./routes/TagsRoutes";
 import UserRouter from "./routes/UsersRoutes";

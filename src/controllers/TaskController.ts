@@ -111,7 +111,11 @@ export default class TaskController {
         .status(200)
         .json({ message: "Tarefa atualizada com sucesso!", task });
     } catch (error: any) {
-      if (error.name === "CastError") {
+      if (error.message === "Tag não existe e não pode ser atribuida") {
+        return res.status(404).json({ message: error.message });
+      }
+      if (error.message === "Tarefa não encontrada") {
+        console.log("entrou aqui");
         return res.status(404).json({ message: "Tarefa não encontrada" });
       }
       console.log(`error: ${error}`);
@@ -133,6 +137,7 @@ export default class TaskController {
       return res.status(200).json({ message: "Tarefa deletada com sucesso!" });
     } catch (error: any) {
       if (error.message === "Tarefa não encontrada!") {
+        console.log("entrou aq tbm");
         return res.status(404).json({ message: error.message });
       }
       console.log(`error: ${error}`);
