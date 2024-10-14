@@ -8,7 +8,7 @@ router.post("/create", authMiddleware, TaskController.create);
 router.get("/", authMiddleware, TaskController.getAll);
 router.get("/:id", authMiddleware, TaskController.getFindById);
 router.post("/bytags", authMiddleware, TaskController.tasksByTag);
-router.patch("/:id", authMiddleware,  TaskController.update);
-router.delete("/:id", authMiddleware,  TaskController.delete);
+router.patch("/:id", authMiddleware, TaskController.update);
+router.delete("/:id", authMiddleware, TaskController.delete);
 
 export default router;

@@ -32,7 +32,7 @@ const authMiddleware = async (
     req.userId = id;
     next();
   } catch (error) {
-    return res.json({ message: "Token Inválido!" });
+    return res.status(401).json({ message: "Token Inválido!" });
   }
 };
 
