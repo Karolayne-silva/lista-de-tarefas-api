@@ -6,6 +6,10 @@ export default class TaskController {
     const { title, status, description, priority, tags } = req.body;
     const userId = req.userId;
 
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
     try {
       const taskData = {
         title,
